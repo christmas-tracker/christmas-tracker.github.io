@@ -13184,6 +13184,19 @@
                 // 9. PLATFORM FILTERS
                 filterButtons.forEach(button => {
                     button.addEventListener('click', () => {
+						// Close any open overviews when changing filters
+				        document.querySelectorAll('.media-card.show-info').forEach(card => {
+				            card.classList.remove('show-info');
+				            
+				            // Reset the 'X' back to 'i' and update the tooltip
+				            const infoBtn = card.querySelector('.info-btn');
+				            if (infoBtn) {
+				                infoBtn.innerHTML = 'i';
+				                infoBtn.setAttribute('data-tooltip', 'Read overview');
+				                infoBtn.classList.remove('is-open');
+				            }
+				        });
+						
                         const selectedPlatform = button.textContent.trim().toLowerCase();
                         filterButtons.forEach(btn => btn.classList.remove('active'));
                         button.classList.add('active');
