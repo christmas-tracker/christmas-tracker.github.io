@@ -13250,12 +13250,17 @@
                         if (formatFilter) formatFilter.value = 'all';
 
                         Array.from(catalogGrid.children).forEach(item => {
-                            if (item.classList.contains('media-card') || item.classList.contains('series-folder')) {
-                                const tag = item.querySelector('.platform-tag');
-                                const cardPlatform = tag ? tag.textContent.trim().toLowerCase() : "";
-                                item.style.display = (selectedPlatform === 'all' || cardPlatform === selectedPlatform) ? '' : 'none';
-                            }
-                        });
+			                // 1. Filter the normal movie/show cards
+			                if (item.classList.contains('media-card')) {
+			                    const tag = item.querySelector('.platform-tag');
+			                    const cardPlatform = tag ? tag.textContent.trim().toLowerCase() : "";
+			                    item.style.display = (selectedPlatform === 'all' || cardPlatform === selectedPlatform) ? '' : 'none';
+			                } 
+			                // 2. FORCE close the TV show episode folders
+			                else if (item.classList.contains('series-folder')) {
+			                    item.style.display = 'none';
+			                }
+			            });
                     });
                 });
 
