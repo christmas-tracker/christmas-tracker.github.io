@@ -13688,9 +13688,6 @@
                 });
 
                 // 7. LOCAL STORAGE & CHECKBOX CLICKS
-                const saveKey = "christmasTracker_v4";
-                let watchedMovies = JSON.parse(localStorage.getItem(saveKey)) || {};
-
                 checkboxes.forEach(checkbox => {
                     const card = checkbox.closest('.media-card');
                     if(!card) return;
@@ -13702,20 +13699,24 @@
                         // Strips out the star so it doesn't break the save key
                         const showTitle = h2El.textContent.replace('★', '').trim();
                         const episodeInfo = typeEl.textContent.trim();
-                        
-                        // THE MAGIC TRICK: Combines title and type into a unique invisible ID 
-                        // (Example: "theholidaymovie" or "greysanatomyrunbabyruns9e9")
-                        const uniqueId = (showTitle + episodeInfo).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                        const uniqueKey = `watched_${showTitle}_${episodeInfo}`;
 
-                        // Check the box on page load if it's in the save file
-                        if (watchedMovies[uniqueId]) {
+                        // This perfectly reads your OLD saves and brings them back!
+                        if (localStorage.getItem(uniqueKey) === 'true') {
                             checkbox.checked = true;
+                            card.classList.add('is-watched');
                         }
 
-                        // Save instantly to phone when clicked and update the progress bar
                         checkbox.addEventListener('change', (event) => {
-                            watchedMovies[uniqueId] = event.target.checked;
-                            localStorage.setItem(saveKey, JSON.stringify(watchedMovies));
+                            localStorage.setItem(uniqueKey, event.target.checked);
+                            
+                            // Help the CSS filters turn on/off
+                            if (event.target.checked) {
+                                card.classList.add('is-watched');
+                            } else {
+                                card.classList.remove('is-watched');
+                            }
+                            
                             updateProgress(); 
                         });
                     }
