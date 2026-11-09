@@ -13688,9 +13688,13 @@
                 });
 
                 // 7. LOCAL STORAGE & CHECKBOX CLICKS
+                const saveKey = "christmasTracker_v4";
+                let watchedMovies = JSON.parse(localStorage.getItem(saveKey)) || {};
+
                 checkboxes.forEach(checkbox => {
                     const card = checkbox.closest('.media-card');
                     if(!card) return;
+                    
                     const h2El = card.querySelector('h2');
                     const typeEl = card.querySelector('.media-type');
                     
@@ -13698,12 +13702,20 @@
                         // Strips out the star so it doesn't break the save key
                         const showTitle = h2El.textContent.replace('★', '').trim();
                         const episodeInfo = typeEl.textContent.trim();
-                        const uniqueKey = `watched_${showTitle}_${episodeInfo}`;
+                        
+                        // THE MAGIC TRICK: Combines title and type into a unique invisible ID 
+                        // (Example: "theholidaymovie" or "greysanatomyrunbabyruns9e9")
+                        const uniqueId = (showTitle + episodeInfo).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 
-                        if (localStorage.getItem(uniqueKey) === 'true') checkbox.checked = true;
+                        // Check the box on page load if it's in the save file
+                        if (watchedMovies[uniqueId]) {
+                            checkbox.checked = true;
+                        }
 
+                        // Save instantly to phone when clicked and update the progress bar
                         checkbox.addEventListener('change', (event) => {
-                            localStorage.setItem(uniqueKey, event.target.checked);
+                            watchedMovies[uniqueId] = event.target.checked;
+                            localStorage.setItem(saveKey, JSON.stringify(watchedMovies));
                             updateProgress(); 
                         });
                     }
