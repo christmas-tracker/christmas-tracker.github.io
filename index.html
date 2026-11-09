@@ -5,6 +5,7 @@
         <meta name="robots" content="noindex, unfollow">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Holiday Watchlist Tracker</title> 
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
         <style>
             /* Base Styles */
             * {
@@ -1024,6 +1025,233 @@
                 background-color: #114b2b; /* Turns green on hover */
             }
 
+            /* =========================================
+               DYNAMIC PAGE ANIMATIONS
+               ========================================= */
+            /* 1. Scroll Reveal */
+            .reveal {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+                transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            .reveal.active {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            /* 2. Dopamine Bounce on Checkmark */
+            @keyframes dopamineBounce {
+                0% { transform: scale(1); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+                40% { transform: scale(1.08) rotate(1deg); box-shadow: 0 0 25px rgba(211, 47, 47, 0.6); border-color: #d32f2f; }
+                100% { transform: scale(0.98); }
+            }
+            .dopamine-pop {
+                animation: dopamineBounce 0.5s ease-out forwards;
+            }
+
+            /* =========================================
+               DYNAMIC GLASS SHINE HOVER
+               ========================================= */
+            .image-wrapper::after {
+                content: '';
+                position: absolute;
+                top: 0; left: -100%; width: 50%; height: 100%;
+                background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+                transform: skewX(-20deg);
+                transition: left 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                z-index: 3;
+                pointer-events: none;
+            }
+            .media-card:hover .image-wrapper::after {
+                left: 150%;
+            }
+
+            /* =========================================
+               MUSIC POPUP STYLES
+               ========================================= */
+            .music-btn {
+                display: inline-block;
+                background-color: #d32f2f; /* Festive red instead of Spotify green */
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 50px;
+                font-size: 13px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .music-btn:hover { background-color: #114b2b; transform: scale(1.05); }
+            
+            .music-modal-overlay {
+                display: none; /* Hidden by default */
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.75);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                z-index: 10000;
+                justify-content: center; align-items: center;
+            }
+            .music-modal-content {
+                background: var(--card-bg);
+                padding: 2.5rem;
+                border-radius: 20px;
+                text-align: center;
+                position: relative;
+                width: 90%; max-width: 350px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                animation: highlightPop 0.4s ease-out; 
+            }
+            .close-music-btn {
+                position: absolute; top: 10px; right: 15px;
+                background: transparent; border: none;
+                color: var(--text-secondary);
+                font-size: 1.8rem; cursor: pointer;
+                transition: color 0.2s;
+            }
+            .close-music-btn:hover { color: #d32f2f; }
+            
+            /* =========================================
+               MUSIC POPUP STYLES (PREMIUM NEUTRAL)
+               ========================================= */
+            .music-btn {
+                display: inline-block;
+                background-color: #d32f2f;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 50px;
+                font-size: 13px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .music-btn:hover { background-color: #114b2b; transform: scale(1.05); }
+            
+            .music-modal-overlay {
+                display: none; 
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.75);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                z-index: 10000;
+                justify-content: center; align-items: center;
+            }
+            .music-modal-content {
+                background: var(--card-bg);
+                padding: 2.5rem;
+                border-radius: 24px;
+                text-align: center;
+                position: relative;
+                width: 90%; max-width: 340px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+                animation: highlightPop 0.4s ease-out; 
+            }
+            .close-music-btn {
+                position: absolute; top: 12px; right: 18px;
+                background: transparent; border: none;
+                color: var(--text-secondary);
+                font-size: 1.8rem; cursor: pointer;
+                transition: color 0.2s;
+            }
+            .close-music-btn:hover { color: #d32f2f; }
+            
+            .music-options {
+                display: flex; flex-direction: column; gap: 10px;
+            }
+            
+            /* Sleek, Neutral Base State */
+            .music-link {
+                padding: 14px;
+                border-radius: 12px;
+                background: rgba(0, 0, 0, 0.04);
+                color: var(--text-primary) !important;
+                font-weight: 600;
+                text-decoration: none;
+                font-size: 1.05rem;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            
+            /* Adapts perfectly to your Dark Mode */
+            [data-theme="dark"] .music-link {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            /* The Hover Reveal - 100% Unique Brand Gradients */
+            
+            /* Spotify: Neon Emerald to Deep Forest Green */
+            .music-link.spotify:hover { background: linear-gradient(135deg, #1DB954 0%, #14873d 100%); color: #ffffff !important; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(29, 185, 84, 0.3); border-color: #1DB954; }
+            
+            /* Apple Music: Signature Cherry to Magenta */
+            .music-link.apple:hover { background: linear-gradient(135deg, #fa243c 0%, #f5317f 100%); color: #ffffff !important; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(250, 36, 60, 0.3); border-color: #fa243c; }
+            
+            /* YouTube: Bright Crimson to Deep Ruby */
+            .music-link.youtube:hover { background: linear-gradient(135deg, #FF0000 0%, #c40000 100%); color: #ffffff !important; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(255, 0, 0, 0.3); border-color: #FF0000; }
+            
+            /* Amazon Music: Vibrant Cyan to Azure Blue */
+            .music-link.amazon:hover { background: linear-gradient(135deg, #00A8E1 0%, #007bb5 100%); color: #ffffff !important; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0, 168, 225, 0.3); border-color: #00A8E1; }
+            
+            /* Deezer: Electric Sunset (Purple to Orange) */
+            .music-link.deezer:hover { background: linear-gradient(135deg, #A238FF 0%, #FF8A00 100%); color: #ffffff !important; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(162, 56, 255, 0.3); border-color: #A238FF; }
+            
+            /* Anghami: Deep Violet to Electric Pink */
+            .music-link.anghami:hover { background: linear-gradient(135deg, #8224E3 0%, #b132ff 100%); color: #ffffff !important; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(130, 36, 227, 0.3); border-color: #8224E3; }
+
+            /* =========================================
+               CONTINUE WATCHING ROW
+               ========================================= */
+            .up-next-track {
+                display: flex;
+                gap: 1.5rem;
+                overflow-x: auto;
+                padding-bottom: 1.5rem;
+                padding-top: 0.5rem;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: thin;
+                scrollbar-color: var(--accent-green) transparent;
+            }
+            .up-next-track::-webkit-scrollbar { height: 8px; }
+            .up-next-track::-webkit-scrollbar-thumb { background: var(--accent-green); border-radius: 10px; }
+            
+            /* Make the cloned cards look like standard movie posters */
+            .up-next-track .media-card {
+                flex: 0 0 200px; /* Fixed width so they form a perfect horizontal row */
+                scroll-snap-align: start;
+                opacity: 1 !important;
+                transform: none !important;
+                display: flex !important;
+                border: 1px solid var(--border-color);
+            }
+            /* Force the hidden episode images to show up! */
+            .up-next-track .media-card .image-wrapper { display: block !important; }
+            .up-next-track .media-card .card-content { display: flex !important; padding: 1rem !important; gap: 0 !important; grid-template-columns: 1fr; }
+
+            /* =========================================
+               SMOOTH FOLDER EXPANSION
+               ========================================= */
+            .series-folder[open] .folder-episode-list {
+                animation: folderGlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            }
+            
+            @keyframes folderGlide {
+                0% { 
+                    opacity: 0; 
+                    transform: translateY(-20px) scale(0.98); 
+                }
+                100% { 
+                    opacity: 1; 
+                    transform: translateY(0) scale(1); 
+                }
+            }
+
+            /* Removes the default black outline when clicking the folder on some browsers */
+            .series-folder summary:focus {
+                outline: none;
+            }
         </style>
     </head>
     <body>
@@ -1057,13 +1285,14 @@
                 <!-- New Randomizer Button -->
                 <button id="randomizer-btn" class="random-btn">🎲 Pick For Me</button>
                 <button id="dark-mode-toggle" class="random-btn" onclick="toggleDarkMode()">🌙 Christmas Eve Mode</button>
-                <label class="hide-toggle">
-                    <input type="checkbox" id="hide-watched-toggle">
-                    <span>Hide Watched</span>
-                </label>
+                
                 <input type="text" id="search-bar" class="search-input" placeholder="Search shows or movies...">
+                
+                <!-- The Upgraded Master Dropdown -->
                 <select id="format-filter" class="search-input" style="cursor: pointer; min-width: 160px;">
-                    <option value="all">🍿 All Formats</option>
+                    <option value="all">🍿 All Titles</option>
+                    <option value="unwatched">👀 Unwatched Only</option>
+                    <option value="watched">✅ Watched Only</option>
                     <option value="movie">🎬 Movies Only</option>
                     <option value="tv">📺 TV Shows Only</option>
                     <option value="vf">🇫🇷 VF Only</option>
@@ -1080,8 +1309,42 @@
             <button>TF1+</button>
             <button>M6+</button> <!-- NEW M6+ BUTTON -->
             <button>Local</button>
-            <a href="https://open.spotify.com/genre/0JQ5DAqbMKFDKyRxRDLIbk?trackId=3qhlB30KknSejmIvZZLjOD" class="spotify-btn" target="_blank">Christmas Songs</a>
+            <button id="music-btn" class="music-btn">🎵 Christmas Songs</button>
         </nav>
+
+        <!-- The Friendly Empty State (Hidden by default) -->
+        <div id="friendly-empty-state" style="display: none; grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-secondary);">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🎅</div>
+            <h2>Ho Ho... Oh no!</h2>
+            <p>Santa's elves couldn't find any movies matching your search or filter.</p>
+        </div>
+
+        <!-- The Music Platform Popup -->
+        <div id="music-modal" class="music-modal-overlay">
+            <div class="music-modal-content">
+                <button id="close-music-modal" class="close-music-btn">&times;</button>
+                <h2 style="margin-bottom: 20px; color: var(--text-primary);">Choose Your Player 🎧</h2>
+                <div class="music-options">
+                    <!-- I've added excellent default holiday playlists for each, but you can swap the URLs! -->
+                    <a href="https://open.spotify.com/genre/0JQ5DAqbMKFDKyRxRDLIbk?trackId=3qhlB30KknSejmIvZZLjOD" target="_blank" class="music-link spotify">Spotify</a>
+                    <a href="https://music.apple.com/fr/curator/apple-music-christmas/1053601584?l=en-GB" target="_blank" class="music-link apple">Apple Music</a>
+                    <a href="https://youtu.be/7KNUYh9Xh1c?si=cwUmAwDzEiCrzxC5" target="_blank" class="music-link youtube">YouTube</a>
+                    <a href="https://music.amazon.com/search/christmas/stations?filter=IsLibrary%7Cfalse&sc=none" target="_blank" class="music-link amazon">Amazon Music</a>
+                    <a href="https://www.deezer.com/us/channels/theholidays" target="_blank" class="music-link deezer">Deezer</a>
+                    <a href="https://play.anghami.com/tag/46" target="_blank" class="music-link anghami">Anghami</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- UP NEXT / CONTINUE WATCHING ROW -->
+        <section id="up-next-container" style="display: none; max-width: 1200px; margin: 0 auto 1.5rem auto; padding: 0 2rem;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+                📺 Continue Watching
+            </h2>
+            <div id="up-next-track" class="up-next-track">
+                <!-- JavaScript will inject the next unwatched episodes here -->
+            </div>
+        </section>
 
         <main class="catalog-grid">
             <article class="media-card" data-synopsis="A Christmas Carol (2009) is a visually striking, motion-capture animated adaptation that follows the miserly Ebenezer Scrooge as he is visited by three ghosts on Christmas Eve. Through these supernatural encounters, Scrooge is forced to confront his past, present, and future, ultimately finding redemption and the true spirit of the holidays.">
@@ -2354,6 +2617,27 @@
                     <h2><a href="https://www.primevideo.com/region/eu/detail/0JD1DGWCO553PST9964E0GFR07?ref_=atv_sr_fle_c_sr782405_pvsearchresults_1_2" target="_blank">Merry Liddle Christmas</a></h2>
                     <p class="media-type">Movie</p>
                     <span class="duration-badge">⏱ 1h 27min</span>
+                    <label class="checkbox-container">
+                        <input type="checkbox">
+                        <span class="checkmark"></span> Watched
+                    </label>
+                </div>
+            </article>
+
+            <article class="media-card" data-synopsis="When a dedicated, Christmas-loving detective goes undercover to crack a high-stakes diamond heist, she unexpectedly finds herself falling for the charming prime suspect. As the festive investigation unfolds, she must balance her growing feelings with her duty to uncover the truth and close the case before the holidays.">
+                <!-- Clickable Poster -->
+                <a href="https://www.primevideo.com/region/eu/detail/0FGFRYC5PTJ4DGNJ8F4EPEJYM1?ref_=atv_sr_fle_c_sr782405_pvsearchresults_1_2" target="_blank">
+                    <div class="image-wrapper">
+                        <img src="https://image.tmdb.org/t/p/original/7gRwH4w0gihgoDGAPJ5rcYFEZO0.jpg" class="poster-img" loading="lazy" alt="Holidate Poster">
+                        <span class="platform-tag">M6+</span>
+                    </div>
+                </a>
+                
+                <div class="card-content">
+                    <!-- Clickable Title -->
+                    <h2><a href="https://www.primevideo.com/region/eu/detail/0FGFRYC5PTJ4DGNJ8F4EPEJYM1?ref_=atv_sr_fle_c_sr782405_pvsearchresults_1_2" target="_blank">Christmas Catch</a></h2>
+                    <p class="media-type">Movie</p>
+                    <span class="duration-badge">⏱ 1h 21min</span>
                     <label class="checkbox-container">
                         <input type="checkbox">
                         <span class="checkmark"></span> Watched
@@ -13595,6 +13879,15 @@
             }
 
             document.addEventListener('DOMContentLoaded', () => {
+                // --- THE COZY GREETING ---
+                const bannerSubtitle = document.querySelector('.hero-banner p');
+                const hour = new Date().getHours();
+                if (bannerSubtitle) {
+                    if (hour < 12) bannerSubtitle.innerHTML = "Good morning! Grab some coffee and start the marathon ☕️❄️";
+                    else if (hour < 18) bannerSubtitle.innerHTML = "The perfect afternoon for a cozy holiday movie 🍿🎄";
+                    else bannerSubtitle.innerHTML = "Late night Christmas marathon? We love to see it 🌙✨";
+                }
+
                 const catalogGrid = document.querySelector('.catalog-grid');
                 const searchBar = document.getElementById('search-bar');
                 const hideWatchedToggle = document.getElementById('hide-watched-toggle');
@@ -13672,13 +13965,27 @@
                     });
                 }
 
-                // 5. PROGRESS BAR MATH
+                // 5. PROGRESS BAR MATH & CHEERLEADER
                 function updateProgress() {
                     const total = checkboxes.length;
                     const watchedBoxes = Array.from(document.querySelectorAll('.checkbox-container input[type="checkbox"]:checked'));
                     const watched = watchedBoxes.length;
                     
-                    if(progressText) progressText.textContent = `🎄 ${watched} / ${total} Watched`;
+                    // The Friendly Cheerleader Logic
+                    // The Friendly Cheerleader Logic (Scaled for 570+ shows!)
+                    if (progressText) {
+                        let cheer = "Time to start the marathon!";
+                        if (watched > 0) cheer = "You're on the nice list! 🎁";
+                        if (watched >= 10) cheer = "10 down! Grab some hot cocoa ☕️";
+                        if (watched >= 50) cheer = "50 watched?! You're officially in the holiday spirit 🎄";
+                        if (watched >= 100) cheer = "100+ shows! You're a holiday movie expert 🎬";
+                        if (watched >= 250) cheer = "250+ down! Halfway to legendary status 📝🎅";
+                        if (watched >= 400) cheer = "400+ watched! Absolute Christmas fanatic territory ❄️🔥";
+                        if (watched >= 500) cheer = "Over 500?! You basically LIVE at the North Pole now 🏠⛄";
+                        if (watched === total && total > 0) cheer = "You watched them ALL! The ultimate Christmas champion! 👑🎅";
+                        
+                        progressText.innerHTML = `🎄 Marathon Progress <br><span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: normal; margin-top:4px; display:inline-block;">${cheer}</span>`;
+                    }
 
                     let netflix = 0, prime = 0, tf1 = 0, m6 = 0, local = 0, disney = 0;
                     watchedBoxes.forEach(box => {
@@ -13710,7 +14017,8 @@
                     if(fillE) fillE.style.width = total ? `${(local / total) * 100}%` : '0%';
                     if(fillD) fillD.style.width = total ? `${(disney / total) * 100}%` : '0%';
                     
-                    updateFolderBadgesAndStatus(); 
+                    updateFolderBadgesAndStatus();
+                    buildUpNext();
                 }
 
                 // 6. AUTO-INJECT MUST-WATCH STARS
@@ -13740,12 +14048,10 @@
                     const typeEl = card.querySelector('.media-type');
                     
                     if(h2El && typeEl) {
-                        // Strips out the star so it doesn't break the save key
                         const showTitle = h2El.textContent.replace('★', '').trim();
                         const episodeInfo = typeEl.textContent.trim();
                         const uniqueKey = `watched_${showTitle}_${episodeInfo}`;
 
-                        // This perfectly reads your OLD saves and brings them back!
                         if (localStorage.getItem(uniqueKey) === 'true') {
                             checkbox.checked = true;
                             card.classList.add('is-watched');
@@ -13754,9 +14060,27 @@
                         checkbox.addEventListener('change', (event) => {
                             localStorage.setItem(uniqueKey, event.target.checked);
                             
-                            // Help the CSS filters turn on/off
                             if (event.target.checked) {
                                 card.classList.add('is-watched');
+                                
+                                // THE DOPAMINE HIT: Fire festive confetti exactly where they clicked!
+                                if (typeof confetti === 'function') {
+                                    const rect = event.target.getBoundingClientRect();
+                                    // Calculate exact click coordinates
+                                    const x = (rect.left + (rect.width / 2)) / window.innerWidth;
+                                    const y = (rect.top + (rect.height / 2)) / window.innerHeight;
+                                    
+                                    confetti({
+                                        particleCount: 60,
+                                        spread: 70,
+                                        origin: { x: x, y: y },
+                                        colors: ['#ffffff', '#ffb800', '#d32f2f', '#114b2b'], // Snow, Gold, Red, Green
+                                        shapes: ['circle', 'square'],
+                                        ticks: 150,
+                                        gravity: 0.8,
+                                        zIndex: 9999
+                                    });
+                                }
                             } else {
                                 card.classList.remove('is-watched');
                             }
@@ -13830,19 +14154,22 @@
                 // 9. PLATFORM FILTERS
                 filterButtons.forEach(button => {
                     button.addEventListener('click', () => {
-						// Close any open overviews when changing filters
-				        document.querySelectorAll('.media-card.show-info').forEach(card => {
-				            card.classList.remove('show-info');
-				            
-				            // Reset the 'X' back to 'i' and update the tooltip
-				            const infoBtn = card.querySelector('.info-btn');
-				            if (infoBtn) {
-				                infoBtn.innerHTML = 'i';
-				                infoBtn.setAttribute('data-tooltip', 'Read overview');
-				                infoBtn.classList.remove('is-open');
-				            }
-				        });
-						
+                        // 🛑 THE FIX: Ignore the Music and Favorites buttons so they don't hide your movies!
+                        if (button.id === 'music-btn' || button.id === 'favorites-btn') return;
+
+                        // Close any open overviews when changing filters
+                        document.querySelectorAll('.media-card.show-info').forEach(card => {
+                            card.classList.remove('show-info');
+                            
+                            // Reset the 'X' back to 'i' and update the tooltip
+                            const infoBtn = card.querySelector('.info-btn');
+                            if (infoBtn) {
+                                infoBtn.innerHTML = 'i';
+                                infoBtn.setAttribute('data-tooltip', 'Read overview');
+                                infoBtn.classList.remove('is-open');
+                            }
+                        });
+                        
                         const selectedPlatform = button.textContent.trim().toLowerCase();
                         filterButtons.forEach(btn => btn.classList.remove('active'));
                         button.classList.add('active');
@@ -13866,67 +14193,117 @@
                     });
                 });
 
-                // 10. LIVE SEARCH
+                // 10. LIVE SEARCH WITH FRIENDLY EMPTY STATE
+                const emptyStateMsg = document.getElementById('friendly-empty-state');
+                
                 if(searchBar) {
                     searchBar.addEventListener('input', (e) => {
                         const term = e.target.value.toLowerCase();
+                        let visibleCount = 0;
+                        
                         Array.from(catalogGrid.children).forEach(item => {
                             if (item.classList.contains('media-card') || item.classList.contains('series-folder')) {
                                 const title = item.querySelector('h2').textContent.toLowerCase();
-                                item.style.display = title.includes(term) ? '' : 'none';
+                                if (title.includes(term)) {
+                                    item.style.display = '';
+                                    visibleCount++;
+                                } else {
+                                    item.style.display = 'none';
+                                }
                             }
                         });
+                        
+                        // Show the cute Santa message if 0 movies match the search
+                        if (emptyStateMsg) {
+                            emptyStateMsg.style.display = (visibleCount === 0) ? 'block' : 'none';
+                        }
                     });
                 }
 
-                // 11. FORMAT FILTER (Movies vs TV)
+                // 11. FORMAT FILTER (Movies vs TV vs Watched)
                 if(formatFilter) {
                     formatFilter.addEventListener('change', (e) => {
                         const format = e.target.value;
                         const rootItems = Array.from(catalogGrid.children).filter(el => el.classList.contains('media-card') || el.classList.contains('series-folder'));
                         
                         rootItems.forEach(item => {
+                            // 1. Identify what type of media this is
                             const isFolder = item.classList.contains('series-folder');
                             const mediaTypeText = item.querySelector('.media-type') ? item.querySelector('.media-type').textContent.toLowerCase() : "";
                             const isMovie = mediaTypeText.includes("movie") && !isFolder;
                             const isTV = isFolder || mediaTypeText.includes("tv");
+                            
+                            // 2. Identify if it has been watched
+                            const checkbox = item.querySelector('input[type="checkbox"]');
+                            const isWatched = checkbox ? checkbox.checked : item.classList.contains('is-watched');
 
+                            // 3. Show or hide based on the dropdown selection
                             if (format === 'all') item.style.display = '';
                             else if (format === 'movie') item.style.display = isMovie ? '' : 'none';
                             else if (format === 'tv') item.style.display = isTV ? '' : 'none';
                             else if (format === 'vf') item.style.display = (item.getAttribute('data-audio') === 'vf') ? '' : 'none';
+                            else if (format === 'unwatched') item.style.display = !isWatched ? '' : 'none';
+                            else if (format === 'watched') item.style.display = isWatched ? '' : 'none';
                         });
                     });
                 }
 
-                // 12. LIVE CHRISTMAS COUNTDOWN
-                function startCountdown() {
-                    const countdownEl = document.getElementById('countdown-timer');
-                    if(!countdownEl) return;
-                    setInterval(() => {
-                        const now = new Date();
-                        const currentYear = now.getFullYear();
-                        let xmas = new Date(currentYear, 11, 25); 
-                        if (now.getTime() > xmas.getTime()) xmas = new Date(currentYear + 1, 11, 25);
-                        
-                        // Restored the missing math operators here!
-                        const diff = xmas - now;
-                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                        const minutes = Math.floor((diff / 1000 / 60) % 60);
-                        const seconds = Math.floor((diff / 1000) % 60);
-                        
-                        countdownEl.innerHTML = `⏳ <b>${days}d ${hours}h ${minutes}m ${seconds}s</b> until Christmas!`;
-                    }, 1000);
-                }
-                startCountdown();
+                // --- LIVE CHRISTMAS COUNTDOWN ---
+                function updateCountdown() {
+                    const timerEl = document.getElementById('countdown-timer');
+                    if (!timerEl) return;
 
-                // 13. RANDOMIZER
+                    const now = new Date();
+                    const currentYear = now.getFullYear();
+                    // Set to Dec 25 of current year
+                    let christmas = new Date(currentYear, 11, 25); 
+
+                    // If Christmas already passed this year, count down to next year
+                    if (now.getTime() > christmas.getTime()) {
+                        christmas = new Date(currentYear + 1, 11, 25);
+                    }
+
+                    const diff = christmas - now;
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                    const minutes = Math.floor((diff / 1000 / 60) % 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+
+                    timerEl.innerHTML = `⏳ ${days}d ${hours}h ${minutes}m ${seconds}s until Christmas!`;
+                }
+                
+                // Start the clock and update it every 1 second
+                setInterval(updateCountdown, 1000);
+                updateCountdown(); // Run it immediately so it doesn't wait 1 second to appear
+
+                // 13. SMART RANDOMIZER (Movies + Next Episodes Only)
                 const randomBtn = document.getElementById('randomizer-btn');
                 if(randomBtn) {
                     randomBtn.addEventListener('click', () => {
-                        const unwatched = Array.from(checkboxes).filter(box => !box.checked);
-                        if (unwatched.length === 0) { alert("You have watched everything! Time to go outside. 🎄"); return; }
+                        const pickableBoxes = [];
+                        
+                        // 1. Add standalone movies (that aren't hidden by filters)
+                        document.querySelectorAll('.catalog-grid > .media-card').forEach(card => {
+                            if (card.style.display !== 'none') {
+                                const box = card.querySelector('input[type="checkbox"]');
+                                if (box && !box.checked) pickableBoxes.push(box);
+                            }
+                        });
+
+                        // 2. Add ONLY the first unwatched episode of each TV show
+                        document.querySelectorAll('.catalog-grid > .series-folder').forEach(folder => {
+                            if (folder.style.display !== 'none') {
+                                const epBoxes = Array.from(folder.querySelectorAll('.folder-episode-list input[type="checkbox"]'));
+                                // Find the FIRST checkbox in this folder that is NOT checked
+                                const firstUnwatched = epBoxes.find(box => !box.checked);
+                                if (firstUnwatched) pickableBoxes.push(firstUnwatched);
+                            }
+                        });
+
+                        if (pickableBoxes.length === 0) { 
+                            alert("You have watched everything! Time to go outside. 🎄"); 
+                            return; 
+                        }
 
                         const originalText = randomBtn.innerHTML;
                         randomBtn.disabled = true;
@@ -13946,7 +14323,8 @@
                             randomBtn.style.cursor = 'pointer';
                             randomBtn.style.opacity = '1';
 
-                            const randomBox = unwatched[Math.floor(Math.random() * unwatched.length)];
+                            // Pick randomly from our new, curated smart list
+                            const randomBox = pickableBoxes[Math.floor(Math.random() * pickableBoxes.length)];
                             const targetCard = randomBox.closest('.media-card');
                             const parentFolder = randomBox.closest('.series-folder');
 
@@ -14090,6 +14468,135 @@
                     }
                 }
             });
+
+            // 17. REVEAL ON SCROLL OBSERVER (Repeating)
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1 
+            };
+
+            const scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // The card enters the screen, trigger the animation!
+                        entry.target.classList.add('active');
+                    } else {
+                        // The card leaves the screen, hide it so it can reveal again!
+                        entry.target.classList.remove('active');
+                    }
+                });
+            }, observerOptions);
+
+            // Find every movie card and apply the tracker
+            document.querySelectorAll('.media-card, .series-folder').forEach(el => {
+                if (!el.closest('.folder-episode-list')) {
+                    el.classList.add('reveal');
+                    scrollObserver.observe(el);
+                }
+            });
+
+            // 18. MUSIC MODAL LOGIC
+            const musicBtn = document.getElementById('music-btn');
+            const musicModal = document.getElementById('music-modal');
+            const closeMusicBtn = document.getElementById('close-music-modal');
+
+            if (musicBtn && musicModal && closeMusicBtn) {
+                // Open the modal
+                musicBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    musicModal.style.display = 'flex';
+                });
+                    
+                // Close with the X button
+                closeMusicBtn.addEventListener('click', () => {
+                    musicModal.style.display = 'none';
+                });
+                    
+                // Close if they click the dark background outside the box
+                musicModal.addEventListener('click', (e) => {
+                    if (e.target === musicModal) {
+                        musicModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // 20. CONTINUE WATCHING (UP NEXT) LOGIC
+                function buildUpNext() {
+                    const upNextTrack = document.getElementById('up-next-track');
+                    const upNextContainer = document.getElementById('up-next-container');
+                    if (!upNextTrack || !upNextContainer) return;
+                    
+                    // Get current filter states
+                    const searchVal = document.getElementById('search-bar') ? document.getElementById('search-bar').value.trim() : "";
+                    const formatVal = document.getElementById('format-filter') ? document.getElementById('format-filter').value : "all";
+                    
+                    // Find out which platform tab is currently active
+                    const activePlatformBtn = document.querySelector('.platform-filters button.active');
+                    const platformVal = activePlatformBtn ? activePlatformBtn.textContent.replace('★', '').trim().toLowerCase() : "all";
+
+                    // Hide the row ONLY if they are typing a search or using a strict format filter (like "Movies Only")
+                    if (searchVal !== "" || (formatVal !== "all" && formatVal !== "unwatched")) {
+                        upNextContainer.style.display = 'none';
+                        return; 
+                    }
+
+                    upNextTrack.innerHTML = '';
+                    let hasNext = false;
+
+                    document.querySelectorAll('.series-folder').forEach(folder => {
+                        const episodes = Array.from(folder.querySelectorAll('.folder-episode-list .media-card'));
+                        
+                        let lastCheckedIndex = -1;
+                        episodes.forEach((ep, index) => {
+                            if (ep.querySelector('input[type="checkbox"]').checked) {
+                                lastCheckedIndex = index;
+                            }
+                        });
+
+                        if (lastCheckedIndex >= 0 && lastCheckedIndex < episodes.length - 1) {
+                            const nextEpisodeCard = episodes[lastCheckedIndex + 1];
+                            
+                            // --- THE MAGIC: Check if this specific episode matches the active platform ---
+                            const platformBadge = nextEpisodeCard.querySelector('.platform-tag');
+                            const episodePlatform = platformBadge ? platformBadge.textContent.trim().toLowerCase() : "";
+                            
+                            // If we are on a specific platform tab, skip this show if it doesn't belong there!
+                            if (platformVal !== "all" && !platformVal.includes("favorites")) {
+                                if (episodePlatform !== platformVal) {
+                                    return; // Skip to the next show
+                                }
+                            }
+                            
+                            // If it passes the filter, build the card!
+                            hasNext = true;
+                            const clone = nextEpisodeCard.cloneNode(true);
+                            
+                            clone.classList.remove('reveal', 'active', 'is-watched', 'highlight-pop');
+                            
+                            const cloneCheckbox = clone.querySelector('input[type="checkbox"]');
+                            if(cloneCheckbox) {
+                                cloneCheckbox.addEventListener('change', (e) => {
+                                    const realCheckbox = nextEpisodeCard.querySelector('input[type="checkbox"]');
+                                    if(realCheckbox) {
+                                        realCheckbox.checked = e.target.checked;
+                                        realCheckbox.dispatchEvent(new Event('change')); 
+                                    }
+                                });
+                            }
+                            upNextTrack.appendChild(clone);
+                        }
+                    });
+
+                    // Only show the container if there is at least one show that passed the filter
+                    upNextContainer.style.display = hasNext ? 'block' : 'none';
+                }
+
+                // Keep the triggers active so it refreshes instantly
+                document.getElementById('search-bar')?.addEventListener('input', buildUpNext);
+                document.getElementById('format-filter')?.addEventListener('change', buildUpNext);
+                document.querySelector('.platform-filters')?.addEventListener('click', () => setTimeout(buildUpNext, 50));
+                
         </script>
         <button id="backToTop" class="back-to-top">↑</button>
         <!-- FESTIVE FOOTER -->
