@@ -14022,13 +14022,24 @@
                     if (progressText) {
                         let cheer = "Time to start the marathon!";
                         if (watched > 0) cheer = "You're on the nice list! 🎁";
-                        if (watched >= 10) cheer = "10 down! Grab some hot cocoa ☕️";
-                        if (watched >= 50) cheer = "50 watched?! You're officially in the holiday spirit 🎄";
-                        if (watched >= 100) cheer = "100+ shows! You're a holiday movie expert 🎬";
-                        if (watched >= 250) cheer = "250+ down! Halfway to legendary status 📝🎅";
-                        if (watched >= 400) cheer = "400+ watched! Absolute Christmas fanatic territory ❄️🔥";
-                        if (watched >= 500) cheer = "Over 500?! You basically LIVE at the North Pole now 🏠⛄";
-                        if (watched === total && total > 0) cheer = "You watched them ALL! The ultimate Christmas champion! 👑🎅";
+                        if (watched >= 10) cheer = "Grab some hot cocoa ☕️";
+                        if (watched >= 25) cheer = "The marathon is officially underway 🏃‍♀️💨";
+                        if (watched >= 50) cheer = "You're officially in the holiday spirit 🎄";
+                        if (watched >= 75) cheer = "Your screen is basically a digital fireplace now 🔥";
+                        if (watched >= 100) cheer = "You're a holiday movie expert 🎬";
+                        if (watched >= 150) cheer = "Santa is officially taking notes 🎅📝";
+                        if (watched >= 200) cheer = "Okay, you are a certified Christmas fanatic ❄️";
+                        if (watched >= 250) cheer = "Welcome to legendary status 🌟";
+                        if (watched >= 300) cheer = "Are you eating gingerbread for every meal? 🍪";
+                        if (watched >= 350) cheer = "Your blood type is currently peppermint 🍬";
+                        if (watched >= 400) cheer = "Absolute Christmas royalty territory 👑🔥";
+                        if (watched >= 450) cheer = "Save some Christmas for the rest of us! 😱";
+                        if (watched >= 500) cheer = "You basically LIVE at the North Pole now 🏠⛄";
+                        if (watched >= 550) cheer = "Running out of hot cocoa yet? ☕️❄️";
+                        if (watched >= 600) cheer = "Santa is officially asking YOU for movie recommendations 🎅🍿";
+                        if (watched >= 650) cheer = "You have single-handedly completed Christmas 🤯🎄";
+                        if (watched >= 700) cheer = "Your commitment to holiday coziness is unmatched! 🏆✨";
+                        if (watched === total && total > 0) cheer = "The ultimate Christmas champion! 👑🎅";
                         
                         progressText.innerHTML = `🎄 Marathon Progress <br><span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: normal; margin-top:4px; display:inline-block;">${cheer}</span>`;
                     }
